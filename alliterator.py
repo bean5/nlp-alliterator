@@ -15,7 +15,8 @@ def alliterate(word, character):
          pass
    l = [query.lemmas[0] for query in wordnet.synsets(word)]
    for i in l:
-      print i.antonyms()
+      #print i.antonyms()
+      pass
 
    return word
 
