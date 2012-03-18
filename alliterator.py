@@ -4,6 +4,7 @@ from operator import itemgetter
 from nltk.corpus import wordnet
 
 def alliterate(word, character):
+   if len(word) == 0: return word
    if word[0] == character:
       return word
    results = [query.name for query in wordnet.synsets(word)]
@@ -42,7 +43,7 @@ class Alliterate(object):
             self.freq[key] = self.freq.setdefault(key, 0) + 1
          except Exception, e:
             pass
-      print self.freq
+      #print self.freq
       m = [(k, v) for (k, v) in self.freq.iteritems()]
       m.sort(key=itemgetter(1), reverse=True)
       try:
@@ -60,17 +61,15 @@ def main(argv=None):
    character = 'a'
    try:
       character = argv[1][0]
-   except Error, e:
+   except Exception, e:
       pass
 
    while True:
       if 'exit' in sentence:
          break
-      sentence = raw_input('Type a sentence: ')
-      Alliterate(sentence)
-      #tokens = sentence.split(' ')
-      #results = [alliterate(word=token, character=character) for token in tokens]
-      #print ' '.join(results)
+      sentences = raw_input('Type a sentence: ')
+      for sentence in sentences.split('.'):
+         Alliterate(sentence)
       
 
 if __name__ == '__main__':
