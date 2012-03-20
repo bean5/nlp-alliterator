@@ -1,41 +1,26 @@
-from sys import argv
+#!/usr/bin/env python
+import re
 from operator import itemgetter
 
 from nltk.corpus import wordnet
 
-def alliterate(word, character):
-   if len(word) == 0: return word
-   if word[0] == character:
-      return word
-   results = [query.name for query in wordnet.synsets(word)]
-   for result in results:
-      try:
-         if result[0] == character:
-            return result[:result.find('.')]
-      except IndexError, e:
-         pass
-   l = [query.lemmas[0] for query in wordnet.synsets(word)]
-   for i in l:
-      #print i.antonyms()
-      pass
-
-   return word
 
 class Alliterate(object):
    def __init__(self, sentence):
       self.freq = {}
       self.character = 'a'
-      tokens = sentence.split(' ')
-      self.firstpass(tokens=tokens)
-      self.secondpass(tokens=tokens)
+      self.output = ''
+      self.tokens = re.split(r"[^a-zA-Z]", sentence)
+      self._firstpass()
 
-   def firstpass(self, tokens):
-      for token in tokens:
+   def _firstpass(self):
+      for token in self.tokens:
          results = [query.name for query in wordnet.synsets(token)]
          f = {}
          for result in results:
-            character = result[0]
-            f[character] = f.setdefault(character, 0) + 1 
+            _result = result[:result.find('.')]
+            for character in _result:
+               f[character] = f.setdefault(character, 0) + 1
          l = [(k, v) for (k, v) in f.iteritems()]
          l.sort(key=itemgetter(1), reverse=True)
          try:
@@ -43,34 +28,43 @@ class Alliterate(object):
             self.freq[key] = self.freq.setdefault(key, 0) + 1
          except Exception, e:
             pass
-      #print self.freq
       m = [(k, v) for (k, v) in self.freq.iteritems()]
       m.sort(key=itemgetter(1), reverse=True)
+      self.characters = [c for c, f in m]
       try:
-         self.character = m[0][0]
+         self.character, frequency = m[0]
       except Exception, e:
          pass
 
-   def secondpass(self, tokens):
-      results = [alliterate(word=token, character=self.character) for token in tokens]
-      print ' '.join(results)
+   def _alliterate(self, word=''):
+      if len(word) == 0: return word
+      for character in self.characters:
 
+         if character in word:
+            return word
+         results = [query.name for query in wordnet.synsets(word)]
+         for result in results:
+            try:
+               _result = result[:result.find('.')]
+               if character in _result:
+                  return _result
+            except IndexError, e:
+               pass
+      return word
+
+   def __str__(self):
+      output = [self._alliterate(word=token) for token in self.tokens]
+      return ' '.join(output)
  
-def main(argv=None):
+def main():
    sentence = ''
-   character = 'a'
-   try:
-      character = argv[1][0]
-   except Exception, e:
-      pass
-
    while True:
       if 'exit' in sentence:
          break
       sentences = raw_input('Type a sentence: ')
       for sentence in sentences.split('.'):
-         Alliterate(sentence)
+         print "\nresults: %s" % Alliterate(sentence)
       
 
 if __name__ == '__main__':
-   main(argv=argv)
+   main()
